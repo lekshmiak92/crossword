@@ -33,8 +33,9 @@
 		td input {
 			width: 4rem;
 			border: none;
-			text-transform: capitalize;
+			/*text-transform: capitalize;*/
     		text-align: center;
+    		background-color: transparent;
 		}
 
 		label{
@@ -55,7 +56,7 @@
 		}
 
 		.bg-green{
-			background-color: #60db60 !important;
+			background-color: #60db60 ;
 		}
 
 		.higlight-red{
@@ -64,6 +65,7 @@
 		.highlight-blue{
 			outline: 2px solid #0e2cff;
 		    outline-style: auto;
+		    background-color: #fbfb6bb3;
 		}
 		div.userAction{
 			margin: 2rem;
@@ -73,6 +75,9 @@
 		    /*width: 33%;*/
 		    float: left;
 		    text-align: center;
+		}
+		input#userInput {
+		    text-transform: uppercase;
 		}
 		/*.siblingRadio{
 			margin-top: 10px;
@@ -100,7 +105,7 @@
 						<input type="radio" id="down" name="direction">Down</input>
 					</div>
 					<div class=" action col-md-4">
-						<button class=" btn btn-primary">Check</button>
+						<button id="checkBtn" class=" btn btn-primary">Check</button>
 					</div>
 				</div>
 			</div>
@@ -130,6 +135,7 @@
 		var rows = apiData.size.rows;
 		var cols = apiData.size.cols;
 		var totalCells = rows * cols ;
+		var selectedClueNum = 0;
 
 
 
@@ -149,7 +155,7 @@
 				}else{
 					cellLabel = apiData.gridnums[i];
 				}
-				gridData[i] = {
+				gridData[i+1] = {
 					label: cellLabel,
 					letter: apiData.grid[i],
 					showLetter:false,
@@ -199,7 +205,7 @@
 				var startCell = apiData.gridnums.indexOf(Number(gridNum)+1);
 
 				for (var j = 0; j < apiData.answers.down[i].length; j++) {
-					connectedCellsArray.push(startCell + j)
+					connectedCellsArray.push(startCell + (j*cols))
 				}
 
 				answerStructure[indexName] = {
@@ -219,11 +225,12 @@
 
 		function getPuzzleLayout(){
      		 $board = $("#gameBoard");
+     		 $board.empty();
      		 var count = 0;
 		        // $board.append("<tr></tr>");
 
-			for (var i = 0; i < totalCells; i++) {
-				var j= i+1;
+			for (var i = 1; i <= totalCells; i++) {
+				// var j= 0;
 				count ++ ;
 				if (count == 1) {
 					$board.append("<tr>");
@@ -233,20 +240,20 @@
 
 				if(!gridData[i].showLetter) {
 					if (gridData[i].letter === "."){
-						$board.children().last().append('<td id="'+j+'"class="deadBlock"></td>');
+						$board.children().last().append('<td id="'+i+'"class="deadBlock"></td>');
 
 					}else{
 
-						$board.children().last().append('<td id="'+j+'"class="clueNum" data-gridNum="'+gridData[i].label+'"><label>'+gridData[i].label+'</label><input maxlength="1" readonly/>'+"</td>");
+						$board.children().last().append('<td id="'+i+'"class="clueNum" data-gridNum="'+gridData[i].label+'"><label>'+gridData[i].label+'</label><input maxlength="1" readonly/>'+"</td>");
 					}
 				}
 				
 				else if ((gridData[i].showLetter) && (gridData[i].status === "correct")) {
-					$board.children().last().append('<td id="'+j+'"class="clueNum bg-green" data-gridNum="'+gridData[i].label+'"><label>'+gridData[i].label+'</label><input maxlength="1" value="'+gridData[i].letter+'" readonly/>'+"</td>");
+					$board.children().last().append('<td id="'+i+'"class="clueNum bg-green" data-gridNum="'+gridData[i].label+'"><label>'+gridData[i].label+'</label><input maxlength="1" value="'+gridData[i].letter+'" readonly/>'+"</td>");
 				}
 
 				else if ((gridData[i].showLetter) && (gridData[i].status === "wrong")) {
-					$board.children().last().append('<td id="'+j+'"class="clueNum higlight-red" data-gridNum="'+gridData[i].label+'"><label>'+gridData[i].label+'</label><input maxlength="1" readonly/>'+"</td>");
+					$board.children().last().append('<td id="'+i+'"class="clueNum higlight-red" data-gridNum="'+gridData[i].label+'"><label>'+gridData[i].label+'</label><input maxlength="1" readonly value="'+gridData[i].letter+'"/></td>');
 				}
 				
 			}
@@ -274,7 +281,7 @@
 	    	$(this).addClass("highlight-blue");
 	    	var gridNumber,acrossKey,downKey;
 	    	gridNumber = Number($(this).attr("data-gridNum"));
-
+	    	selectedClueNum= gridNumber;
 	    	acrossKey = gridNumber+ "_across";
 	    	downKey = gridNumber+ "_down";
 
@@ -283,7 +290,7 @@
 	    		var value = answerStructure[acrossKey].answer;
 	    		var index = apiData.answers.across.indexOf(value);
 	    		$("input#across").attr("disabled",false)
-	    		$("input[type=radio]").attr("checked",false)
+	    		$("input#down").attr("checked",false)
 
 				$("#clueBox").append('<h4>Across:</h4><p>'+ apiData.clues.across[index] +'&nbsp; ('+ value.length + ")</p><br/>");
 	    	
@@ -297,7 +304,7 @@
 				var value = answerStructure[downKey].answer;
 	    		var index = apiData.answers.down.indexOf(value);
 	    		$("input#down").attr("disabled",false)
-	    		$("input[type=radio]").attr("checked",false)
+	    		$("input#across").attr("checked",false)
 
 				$("#clueBox").append('<h4>Down:</h4><p>'+ apiData.clues.down[index] + '&nbsp; ('+ value.length +")</p><br/>");
 
@@ -307,6 +314,41 @@
 				$("input#across").attr("checked",true)
 			}
 
+	    }
+
+	    function compareResult(selectedClueNum,direction,value) {
+	    	var key = selectedClueNum+"_"+direction;
+	    	var input = value;
+	    	var correctAnswer= answerStructure[key].answer;
+	    	console.log(answerStructure[key])
+
+	    	if (value === correctAnswer){
+	    		for (var i = 0; i < correctAnswer.length; i++) {
+	    			var gridCell = answerStructure[key].connectedCells[i];
+	    			gridData[gridCell].showLetter = true;
+	    			gridData[gridCell].letter = correctAnswer.charAt(i);
+	    			gridData[gridCell].status = "correct";
+	    			getPuzzleLayout();
+
+	    		}
+	    	}else{
+	    		for (var i = 0; i < correctAnswer.length; i++) {
+	    			var gridCell = answerStructure[key].connectedCells[i];
+	    			gridData[gridCell].showLetter = true;
+	    			gridData[gridCell].letter = input.charAt(i);
+	    			gridData[gridCell].status = "wrong";
+	    			getPuzzleLayout();
+
+	    		}
+	    	}
+	    	
+	    }
+
+	    function handleClickOfCheck() {
+	    	var direction= $("input[name='direction']:checked").attr("id");
+	    	var value = $("#userInput").val().toUpperCase();;
+
+	    	compareResult(selectedClueNum,direction,value);
 	    }
 		
 		$(function(){
@@ -318,6 +360,7 @@
 			getPuzzleLayout();
 			showClues();
 			$("#gameBoard").on("click","td",fetchClue)
+			$("#checkBtn").on("click",handleClickOfCheck)
 
 
 			
