@@ -33,7 +33,6 @@
 		td input {
 			width: 4rem;
 			border: none;
-			/*text-transform: capitalize;*/
     		text-align: center;
     		background-color: transparent;
 		}
@@ -43,7 +42,6 @@
 			font-size: 10px;
 		}
 		.text-trans{
-			/*color: transparent;*/
 			visibility: hidden;
 		}
 		input:focus {
@@ -74,7 +72,6 @@
 		}
 		div.action {
 		    display: block;
-		    /*width: 33%;*/
 		    float: left;
 		    text-align: center;
 		}
@@ -165,7 +162,6 @@
 
 
 		function generateGridData(){
-			// var gridData = {};
 			var totalCells = apiData.size.rows * apiData.size.cols;
 			var cellLabel;
 
@@ -192,7 +188,7 @@
 		function generateAnswerStructure() {
 			var clueAcross = apiData.clues.across;
 			var clueDown = apiData.clues.down;
-			// var answerStructure = {};
+
 
 			for (var i = 0; i < clueAcross.length ; i++) {
 				var clue = clueAcross[i];
@@ -240,7 +236,6 @@
 
 			}
 
-				// console.log (answerStructure);
 		}
 
 
@@ -248,10 +243,10 @@
      		 $board = $("#gameBoard");
      		 $board.empty();
      		 var count = 0;
-		        // $board.append("<tr></tr>");
+
 
 			for (var i = 1; i <= totalCells; i++) {
-				// var j= 0;
+
 				count ++ ;
 				if (count == 1) {
 					$board.append("<tr>");
@@ -311,33 +306,42 @@
 	    	downKey = gridNumber+ "_down";
 
 	    	$("#clueBox").empty();
-	    	if(answerStructure[acrossKey]){
-	    		var value = answerStructure[acrossKey].answer;
-	    		var index = apiData.answers.across.indexOf(value);
-	    		$("input#across").attr("disabled",false)
-	    		$("input#down").attr("checked",false)
 
-				$("#clueBox").append('<h4>Across:</h4><p>'+ apiData.clues.across[index] +'&nbsp; ('+ value.length + ")</p><br/>");
-	    	
-			}
-			else{
-				$("input#across").attr("disabled",true)
-				$("input#down").attr("checked",true)
 
-			}
-			if (answerStructure[downKey]) {
-				var value = answerStructure[downKey].answer;
-	    		var index = apiData.answers.down.indexOf(value);
-	    		$("input#down").attr("disabled",false)
-	    		$("input#across").attr("checked",false)
+			if ((answerStructure[downKey]) && (answerStructure[acrossKey])){
+		        var valueAcross = answerStructure[acrossKey].answer;
+		          var indexAcross = apiData.answers.across.indexOf(valueAcross);
+		          var valueDown = answerStructure[downKey].answer;
+		          var indexDown = apiData.answers.down.indexOf(valueDown);
 
-				$("#clueBox").append('<h4>Down:</h4><p>'+ apiData.clues.down[index] + '&nbsp; ('+ value.length +")</p><br/>");
 
-			}
-			else{
-				$("input#down").attr("disabled",true)
-				$("input#across").attr("checked",true)
-			}
+		        $("input#down input#across").attr("disabled",false)
+		        $("input#across input#down").attr("checked",false)
+
+		        $("#clueBox").append('<h4>Across:</h4><p>'+ apiData.clues.across[indexAcross] +'&nbsp; ('+ valueAcross.length + ")</p><br/>");
+		        $("#clueBox").append('<h4>Down:</h4><p>'+ apiData.clues.down[indexDown] + '&nbsp; ('+ valueDown.length +")</p><br/>");
+
+		      } else if ((answerStructure[acrossKey]) && !(answerStructure[downKey])){
+		        var value = answerStructure[acrossKey].answer;
+		          var index = apiData.answers.across.indexOf(value);
+
+		          $("input#down").attr("checked",false).attr("disabled",true)
+		          $("input#across").attr("disabled",false).attr("checked",true)
+
+		        $("#clueBox").append('<h4>Across:</h4><p>'+ apiData.clues.across[index] +'&nbsp; ('+ value.length + ")</p><br/>");
+		      } 
+		      else if ((!answerStructure[acrossKey]) && (answerStructure[downKey])) {
+		        var value = answerStructure[downKey].answer;
+		          var index = apiData.answers.down.indexOf(value);
+		          $("input#across").attr("checked",false).attr("disabled",true);
+		          $("input#down").attr("disabled",false).attr("checked",true)
+
+		        $("#clueBox").append('<h4>Down:</h4><p>'+ apiData.clues.down[index] + '&nbsp; ('+ value.length +")</p><br/>");
+		      }
+		      else if((!answerStructure[acrossKey]) && (!answerStructure[downKey])) {
+		        $("input#down input#across").attr("disabled",true)
+		        $("input#across input#down").attr("checked",false)
+		      }
 
 	    }
 
@@ -396,11 +400,7 @@
 			$("#gameBoard").on("click","td",fetchClue)
 			$("#checkBtn").on("click",handleClickOfCheck)
 			$("#clueBtn").on("click",showClues)
-
-
-			
-
-			
+	
 
 		})
 
