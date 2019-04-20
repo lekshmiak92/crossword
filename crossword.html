@@ -61,6 +61,7 @@
 
 		.higlight-red{
 			outline: 1px solid #f52828;
+			    background-color: #f56236;
 		}
 		.highlight-blue{
 			outline: 2px solid #0e2cff;
@@ -69,6 +70,7 @@
 		}
 		div.userAction{
 			margin: 2rem;
+			overflow: hidden;
 		}
 		div.action {
 		    display: block;
@@ -79,16 +81,31 @@
 		input#userInput {
 		    text-transform: uppercase;
 		}
-		/*.siblingRadio{
-			margin-top: 10px;
-		}*/
+		/*siblingRadio*/
 
+		.radio+.radio {
+		    margin-top: 10px;
+		}
+		.cluebox {
+		    padding: 0 8rem;
+		}
+		header{
+			text-align: center;
+		}
+		img.logo{
+			width: 20%;
+
+		}
 
 	</style>
 </head>
 <body>
+	<header>
+		<img class="logo"src="./logo.jpg">
+	
+	</header>
 	<div class="container">
-		<div class="gameArea">
+		<div class="gameArea row">
 			<div id="gameWrap">
 				<table id="gameBoard" class="table table-bordered table-striped table-condensed">
 					
@@ -98,18 +115,21 @@
 			<div id="userControl" class="row">
 				<input type="text" class="form-control" id="userInput" name="">
 				<div class="userAction">
-					<div class="radio action col-md-4">
+					<div class="radio action col-md-3">
 						<input type="radio" id="across" name="direction">Across</input>
 					</div>
-					<div class="radio action col-md-4">
+					<div class="radio action col-md-3">
 						<input type="radio" id="down" name="direction">Down</input>
 					</div>
-					<div class=" action col-md-4">
+					<div class=" action col-md-3">
 						<button id="checkBtn" class=" btn btn-primary">Check</button>
+					</div>
+					<div class=" action col-md-3">
+						<button id="clueBtn" class=" btn btn-warning">All Clues</button>
 					</div>
 				</div>
 			</div>
-			<div class="row" id="clueBox">
+			<div class="cluebox" id="clueBox">
 				<h3>Clues</h3>
 				<div id="cluesDown" class="col-md-6">
 					<h4>Down:</h4>
@@ -159,7 +179,8 @@
 					label: cellLabel,
 					letter: apiData.grid[i],
 					showLetter:false,
-					status:null
+					status:null,
+					setfield:false
 
 				}
 			}
@@ -265,11 +286,15 @@
 	      var cluesArrayAcross = apiData.clues.across;
 	      var cluesArrayDown = apiData.clues.down;
 
-	      for (var i = 0; i < cluesArrayAcross.length; i++) {
-	        $("#cluesAcross").append("<p>"+cluesArrayAcross[i]+"<p>");
-	      }
+	      $("#clueBox").empty();
+	      $("#clueBox").append('<h3>Clues</h3><div id="cluesDown" class="col-md-6"><h4>Down:</h4>')
 	      for (var i = 0; i< cluesArrayDown.length; i++) {
 	        $("#cluesDown").append("<p>"+cluesArrayDown[i]+"<p>");
+	      }
+	      $("#clueBox").append('<div id="cluesAcross" class="col-md-6"><h4>Across:</h4>')
+
+	      for (var i = 0; i < cluesArrayAcross.length; i++) {
+	        $("#cluesAcross").append("<p>"+cluesArrayAcross[i]+"<p>");
 	      }
 
 
@@ -325,22 +350,31 @@
 	    	if (value === correctAnswer){
 	    		for (var i = 0; i < correctAnswer.length; i++) {
 	    			var gridCell = answerStructure[key].connectedCells[i];
-	    			gridData[gridCell].showLetter = true;
-	    			gridData[gridCell].letter = correctAnswer.charAt(i);
-	    			gridData[gridCell].status = "correct";
-	    			getPuzzleLayout();
 
-	    		}
-	    	}else{
-	    		for (var i = 0; i < correctAnswer.length; i++) {
-	    			var gridCell = answerStructure[key].connectedCells[i];
-	    			gridData[gridCell].showLetter = true;
-	    			gridData[gridCell].letter = input.charAt(i);
-	    			gridData[gridCell].status = "wrong";
-	    			getPuzzleLayout();
+	    			if (gridData[gridCell].status !== "correct") {
+		    			gridData[gridCell].showLetter = true;
+		    			gridData[gridCell].letter = correctAnswer.charAt(i);
+		    			gridData[gridCell].status = "correct";
+
+	    			}
 
 	    		}
 	    	}
+	    	else{
+	    		for (var i = 0; i < correctAnswer.length; i++) {
+	    			var gridCell = answerStructure[key].connectedCells[i];
+
+	    			if (gridData[gridCell].status !== "correct") {
+		    			gridData[gridCell].showLetter = true;
+		    			gridData[gridCell].letter = input.charAt(i);
+		    			gridData[gridCell].status = "wrong";
+
+	    			}
+
+	    		}
+	    	}
+	    	
+	    	getPuzzleLayout();
 	    	
 	    }
 
@@ -361,6 +395,7 @@
 			showClues();
 			$("#gameBoard").on("click","td",fetchClue)
 			$("#checkBtn").on("click",handleClickOfCheck)
+			$("#clueBtn").on("click",showClues)
 
 
 			
