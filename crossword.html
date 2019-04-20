@@ -196,7 +196,7 @@
 				var gridNum = splittedClue[0];
 				var indexName = gridNum + "_across";
 				var connectedCellsArray = [];
-				var startCell = apiData.gridnums.indexOf(Number(gridNum)+1);
+				var startCell = apiData.gridnums.indexOf(Number(gridNum))+1;
 
 				for (var j = 0; j < apiData.answers.across[i].length; j++) {
 					connectedCellsArray.push(startCell + j)
@@ -219,7 +219,7 @@
 				var gridNum = splittedClue[0];
 				var indexName = gridNum + "_down";
 				var connectedCellsArray = [];
-				var startCell = apiData.gridnums.indexOf(Number(gridNum)+1);
+				var startCell = apiData.gridnums.indexOf(Number(gridNum))+1;
 
 				for (var j = 0; j < apiData.answers.down[i].length; j++) {
 					connectedCellsArray.push(startCell + (j*cols))
@@ -229,12 +229,14 @@
 					
 						answer: apiData.answers.down[i],
 						length: apiData.answers.down[i].length,
-						connectedCells : connectedCellsArray
-					
+						connectedCells : connectedCellsArray,
+						cell : startCell
 				}
 
 
 			}
+
+			console.log(answerStructure)
 
 		}
 
